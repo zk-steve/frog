@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "crates/server",
+]
+
+[workspace.dependencies]
+tokio = { version = "1.39.3" }
