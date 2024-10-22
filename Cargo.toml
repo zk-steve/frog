@@ -17,7 +17,7 @@ opentelemetry-semantic-conventions = { version = "0.16.0" }
 opentelemetry_sdk = { version = "0.24.1" }
 prost = { version = "0.13.2" }
 readonly = { version = "0.2.12" }
-serde = { version = "1.0.210" }
+serde = { version = "1.0.213" }
 sqlx = { version = "*" }
 tokio = { version = "1.39.3" }
 tonic = { version = "0.12.2" }
