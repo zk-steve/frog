@@ -64,6 +64,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "frog_worker"
+version = "0.0.1"
+dependencies = [
+ "tokio",
+]
+
+[[package]]
 name = "gimli"
 version = "0.31.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

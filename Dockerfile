@@ -25,3 +25,9 @@ WORKDIR /user
 COPY crates/server/config/00-default.toml 00-default.toml
 COPY --from=builder /out/server /usr/local/bin/server
 ENTRYPOINT ["/usr/local/bin/server", "--config-path=*.toml"]
+
+FROM scratch AS worker
+WORKDIR /user
+COPY crates/worker/config/00-default.toml 00-default.toml
+COPY --from=builder /out/worker /usr/local/bin/worker
+ENTRYPOINT ["/usr/local/bin/worker", "--config-path=*.toml"]

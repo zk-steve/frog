@@ -1,0 +1,8 @@
+[package]
+name = "frog_worker"
+version = "0.0.1"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+tokio = { workspace = true, features = ["full"] }
