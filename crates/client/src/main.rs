@@ -34,7 +34,7 @@ async fn main() {
     info!("Shutdown successfully!");
 }
 
-/// Frog Server.
+/// Frog Client.
 #[derive(Parser, Debug)]
 #[command(about, long_about = None)]
 struct Args {

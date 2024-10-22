@@ -5,4 +5,12 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
+axum = { workspace = true, features = ["macros"] }
+clap = { workspace = true, features = ["derive"] }
+common = { workspace = true }
+opentelemetry = { workspace = true }
+readonly = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["full"] }
+tower-http = { workspace = true, features = ["timeout", "trace"] }
+tracing = { workspace = true }
