@@ -8,9 +8,17 @@ build = "build.rs"
 axum = { workspace = true, features = ["macros"] }
 clap = { workspace = true, features = ["derive"] }
 common = { workspace = true }
+graphile_worker = { workspace = true }
 opentelemetry = { workspace = true }
 readonly = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+sqlx = { workspace = true, features = [
+  "chrono",
+  "postgres",
+  "json",
+  "macros",
+  "runtime-tokio",
+], default-features = false }
 tokio = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["timeout", "trace"] }
 tracing = { workspace = true }
