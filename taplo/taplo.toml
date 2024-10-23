@@ -1,4 +1,4 @@
-include = ["**/*.toml"]
+include = ["**/Cargo.toml"]
 
 [formatting]
 align_entries = false

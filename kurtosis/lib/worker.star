@@ -29,6 +29,7 @@ def start(plan, args, suffix):
         postgres_port,
         frog_db["name"],
     )
+    args["schema"] = frog_db["name"]
 
     custom_config_tpl = read_file(src="../templates/01-worker.toml")
     custom_config = plan.render_templates(

@@ -10,6 +10,7 @@ clap = { workspace = true, features = ["derive"] }
 common = { workspace = true }
 graphile_worker = { workspace = true }
 opentelemetry = { workspace = true }
+opentelemetry_sdk = { workspace = true }
 readonly = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 sqlx = { workspace = true, features = [
@@ -22,3 +23,4 @@ sqlx = { workspace = true, features = [
 tokio = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["timeout", "trace"] }
 tracing = { workspace = true }
+tracing-opentelemetry = { workspace = true }

@@ -6,6 +6,8 @@ cargo-fmt:
 	taplo fmt --config taplo/taplo.toml
 
 lint:
+	cargo fmt
+	cargo fix --allow-dirty --allow-staged
 	cargo clippy --fix --allow-dirty --allow-staged
 
 build:

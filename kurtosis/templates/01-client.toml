@@ -1,5 +1,5 @@
-exporter_endpoint = "http://0.0.0.0:7281"
 service_name = "{{$.name}}"
+exporter_endpoint = "{{$.exporter_endpoint}}"
 
 [server]
 url = "0.0.0.0"

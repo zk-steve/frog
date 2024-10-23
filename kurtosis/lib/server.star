@@ -16,6 +16,18 @@ def start(plan, args, suffix):
     )
 
     name = args["name"] + suffix
+    postgres_service = plan.get_service(name="postgres" + suffix)
+    postgres_port = postgres_service.ports["postgres"].number
+    postgres_address = postgres_service.ip_address
+    frog_db = import_module("../databases.star").FROG_DBS["frog_db"]
+    args["pg_url"] = "postgres://{}:{}@{}:{}/{}".format(
+        frog_db["user"],
+        frog_db["password"],
+        postgres_address,
+        postgres_port,
+        frog_db["name"],
+    )
+    args["schema"] = frog_db["name"]
 
     custom_config_tpl = read_file(src="../templates/01-server.toml")
     custom_config = plan.render_templates(
