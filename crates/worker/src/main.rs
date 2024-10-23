@@ -99,5 +99,4 @@ pub async fn run_workers(options: Options) {
         .unwrap();
 
     worker.run().await.unwrap();
-    info!("worker is running");
 }

@@ -4,3 +4,10 @@ service_name = "frog-server"
 [server]
 port = 8000
 url = "0.0.0.0"
+
+[pg]
+url = "postgres://postgres:changeme@127.0.0.1:5432/postgres"
+max_size = 10
+
+[worker]
+schema = "worker"

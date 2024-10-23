@@ -8,9 +8,21 @@ build = "build.rs"
 axum = { workspace = true, features = ["macros"] }
 clap = { workspace = true, features = ["derive"] }
 common = { workspace = true }
+graphile_worker = { workspace = true }
 opentelemetry = { workspace = true }
+opentelemetry_sdk = { workspace = true }
 readonly = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sqlx = { workspace = true, features = [
+  "chrono",
+  "postgres",
+  "json",
+  "macros",
+  "runtime-tokio",
+] }
+thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["timeout", "trace"] }
 tracing = { workspace = true }
+tracing-opentelemetry = { workspace = true }
