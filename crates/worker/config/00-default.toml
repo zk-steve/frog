@@ -11,4 +11,4 @@ max_size = 10
 
 [worker]
 concurrent = 3
-schema = "123"
+schema = "worker"

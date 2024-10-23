@@ -9,8 +9,13 @@ lint:
 	cargo clippy --fix --allow-dirty --allow-staged
 
 build:
-	export BUILDKIT_PROGRESS=plain
-	export DOCKER_BUILDKIT=1
-	docker build -t $(PKG_NAME)-server:$(BUILD_VERSION) --target=server .
-	docker build -t $(PKG_NAME)-client:$(BUILD_VERSION) --target=client .
+	export BUILDKIT_PROGRESS=plain && \
+	export DOCKER_BUILDKIT=1 && \
+	docker build -t $(PKG_NAME)-server:$(BUILD_VERSION) --target=server . && \
+	docker build -t $(PKG_NAME)-client:$(BUILD_VERSION) --target=client . && \
 	docker build -t $(PKG_NAME)-worker:$(BUILD_VERSION) --target=worker .
+
+push:
+	docker push $(PKG_NAME)-server:$(BUILD_VERSION) && \
+	docker push $(PKG_NAME)-client:$(BUILD_VERSION) && \
+	docker push $(PKG_NAME)-worker:$(BUILD_VERSION)

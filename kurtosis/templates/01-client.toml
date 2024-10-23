@@ -1,0 +1,6 @@
+exporter_endpoint = "http://0.0.0.0:7281"
+service_name = "{{$.name}}"
+
+[server]
+url = "0.0.0.0"
+port = {{$.http_port}}

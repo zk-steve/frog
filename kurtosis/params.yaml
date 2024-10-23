@@ -1,0 +1,26 @@
+---
+# Deployment parameters.
+deploy_server: true
+deploy_worker: true
+deploy_client: True
+
+args:
+  # Suffix appended to service names.
+  # Note: It should be a string.
+  deployment_suffix: "-001"
+
+  # The global log level that all components of the stack should log at.
+  # Valid values are "error", "warn", "info", "debug", and "trace".
+  global_log_level: info
+
+  server:
+    image: zksteve/frog-server:v0.0.1-0-g606f62f
+    http_port: 8080
+
+  client:
+    image: zksteve/frog-client:v0.0.1-0-g606f62f
+    http_port: 9944
+
+  worker:
+    image: zksteve/frog-worker:v0.0.1-0-g606f62f
+    http_port: 4000

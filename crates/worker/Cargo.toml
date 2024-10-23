@@ -18,7 +18,7 @@ sqlx = { workspace = true, features = [
   "json",
   "macros",
   "runtime-tokio",
-], default-features = false }
+] }
 tokio = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["timeout", "trace"] }
 tracing = { workspace = true }
