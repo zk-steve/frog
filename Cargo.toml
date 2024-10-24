@@ -8,7 +8,7 @@ common = { path = "crates/common" }
 
 axum = { version = "0.8.0-alpha.1" }
 clap = { version = "4.5.17" }
-config = { version = "0.14.0" }
+config = { version = "0.14.1" }
 glob = { version = "0.3.1" }
 graphile_worker = { version = "0.8.0" }
 opentelemetry = { version = "0.24.0" }
