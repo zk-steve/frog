@@ -23,17 +23,17 @@ RUN mv target/${CARGO_BUILD_TARGET}/release /out
 FROM scratch AS server
 WORKDIR /user
 COPY crates/server/config/00-default.toml 00-default.toml
-COPY --from=builder /out/server /usr/local/bin/server
-ENTRYPOINT ["/usr/local/bin/server", "--config-path=*.toml"]
+COPY --from=builder /out/frog_server /usr/local/bin/frog_server
+ENTRYPOINT ["/usr/local/bin/frog_server", "--config-path=*.toml"]
 
 FROM scratch AS worker
 WORKDIR /user
 COPY crates/worker/config/00-default.toml 00-default.toml
-COPY --from=builder /out/worker /usr/local/bin/worker
-ENTRYPOINT ["/usr/local/bin/worker", "--config-path=*.toml"]
+COPY --from=builder /out/frog_worker /usr/local/bin/frog_worker
+ENTRYPOINT ["/usr/local/bin/frog_worker", "--config-path=*.toml"]
 
 FROM scratch AS client
 WORKDIR /user
 COPY crates/client/config/00-default.toml 00-default.toml
-COPY --from=builder /out/client /usr/local/bin/client
-ENTRYPOINT ["/usr/local/bin/client", "--config-path=*.toml"]
+COPY --from=builder /out/frog_client /usr/local/bin/frog_client
+ENTRYPOINT ["/usr/local/bin/frog_client", "--config-path=*.toml"]
