@@ -1,0 +1,10 @@
+[package]
+name = "frog_adapter"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+async-trait = { workspace = true }
+frog_core = { workspace = true }
+reqwest = { workspace = true }
+tracing = { workspace = true }

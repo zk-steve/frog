@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
-use common::workers::dummy_worker::{DummyWorkerData, DUMMY_WORKER_IDENTIFIER};
+use frog_common::workers::dummy_worker::{DummyWorkerData, DUMMY_WORKER_IDENTIFIER};
 use graphile_worker::{IntoTaskHandlerResult, TaskHandler, WorkerContext};
 use serde::{Deserialize, Serialize};
 use tokio::time::sleep;

@@ -7,7 +7,7 @@ build = "build.rs"
 [dependencies]
 axum = { workspace = true, features = ["macros"] }
 clap = { workspace = true, features = ["derive"] }
-common = { workspace = true }
+frog_common = { workspace = true }
 graphile_worker = { workspace = true }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true }

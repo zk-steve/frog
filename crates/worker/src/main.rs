@@ -6,9 +6,9 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use clap::{Parser, Subcommand};
-use common::cli_args::CliArgs;
-use common::kill_signals;
-use common::loggers::telemetry::init_telemetry;
+use frog_common::cli_args::CliArgs;
+use frog_common::kill_signals;
+use frog_common::loggers::telemetry::init_telemetry;
 use graphile_worker::WorkerOptions;
 use opentelemetry::global;
 use sqlx::postgres::PgConnectOptions;

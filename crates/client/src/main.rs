@@ -1,19 +1,19 @@
-mod options;
-mod routes;
-
+use std::sync::Arc;
 use std::time::Duration;
 
 use clap::{Parser, Subcommand};
-use common::cli_args::CliArgs;
-use common::kill_signals;
-use common::loggers::telemetry::init_telemetry;
+use frog_adapter::http::game::GameClient;
+use frog_client::options::Options;
+use frog_client::routes::routes;
+use frog_client::services::game::GameService;
+use frog_common::cli_args::CliArgs;
+use frog_common::kill_signals;
+use frog_common::loggers::telemetry::init_telemetry;
+use frog_core::ports::game_client::GameClientPort;
 use opentelemetry::global;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 use tracing::info;
-
-use crate::options::Options;
-use crate::routes::routes;
 
 #[tokio::main]
 async fn main() {
@@ -62,6 +62,16 @@ pub async fn serve(options: Options) {
         TimeoutLayer::new(Duration::from_secs(10)),
     ));
 
+    if options.game.player_endpoints.len() != 3 {
+        panic!("invalid config for player endpoints, requires 3");
+    }
+
+    let request_client = reqwest::Client::new();
+    let game_client: Arc<dyn GameClientPort + Sync + Send> = Arc::new(GameClient::new(
+        options.game.server_endpoint.clone(),
+        request_client,
+    ));
+    let game_service = GameService::new(game_client);
     let endpoint = format!("{}:{}", options.server.url.as_str(), options.server.port);
     let listener = tokio::net::TcpListener::bind(endpoint.clone())
         .await

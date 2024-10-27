@@ -7,10 +7,14 @@ build = "build.rs"
 [dependencies]
 axum = { workspace = true, features = ["macros"] }
 clap = { workspace = true, features = ["derive"] }
-common = { workspace = true }
+frog_adapter = { workspace = true }
+frog_common = { workspace = true }
+frog_core = { workspace = true }
 opentelemetry = { workspace = true }
 readonly = { workspace = true }
+reqwest = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["timeout", "trace"] }
 tracing = { workspace = true }

@@ -1,4 +1,4 @@
-use common::options::{default_log, Log};
+use frog_common::options::{default_log, Log};
 use serde::Deserialize;
 
 /// Configuration options for the application.

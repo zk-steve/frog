@@ -1,10 +1,8 @@
 use std::io;
 
 use axum::extract::rejection::JsonRejection;
-use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use frog_core::errors::CoreError;
-use graphile_worker::errors::GraphileWorkerError;
 use thiserror::Error;
 
 use crate::json_response::JsonResponse;
@@ -19,8 +17,6 @@ pub enum AppError {
     IOError(#[from] io::Error),
     #[error("core error")]
     CoreError(#[from] CoreError),
-    #[error("graphile worker error")]
-    GraphileWorkerError(#[from] GraphileWorkerError),
 }
 
 // Tell axum how `AppError` should be converted into a response.
@@ -38,9 +34,6 @@ impl IntoResponse for AppError {
             AppError::JsonRejection(rejection) => {
                 // This error is caused by bad user input so don't log it
                 (rejection.status(), rejection.body_text())
-            }
-            AppError::GraphileWorkerError(error) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, error.to_string())
             }
             // AppError::TimeError(err) => {
             //     // Because `TraceLayer` wraps each request in a span that contains the request
