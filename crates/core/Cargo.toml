@@ -6,5 +6,6 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+phantom = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }

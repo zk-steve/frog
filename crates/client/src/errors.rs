@@ -17,6 +17,8 @@ pub enum AppError {
     IOError(#[from] io::Error),
     #[error("core error")]
     CoreError(#[from] CoreError),
+    #[error("bincode error")]
+    BincodeError(#[from] bincode::Error),
 }
 
 // Tell axum how `AppError` should be converted into a response.

@@ -6,16 +6,18 @@ build = "build.rs"
 
 [dependencies]
 axum = { workspace = true, features = ["macros"] }
+bincode = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 frog_adapter = { workspace = true }
 frog_common = { workspace = true }
 frog_core = { workspace = true }
 graphile_worker = { workspace = true }
+lazy_static = { workspace = true }
 opentelemetry = { workspace = true }
-opentelemetry_sdk = { workspace = true }
+phantom = { workspace = true }
+phantom-zone-evaluator = { workspace = true }
 readonly = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
 sqlx = { workspace = true, features = [
   "chrono",
   "postgres",
@@ -25,6 +27,5 @@ sqlx = { workspace = true, features = [
 ] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
-tower-http = { workspace = true, features = ["timeout", "trace"] }
+tower-http = { workspace = true, features = ["timeout", "trace", "limit"] }
 tracing = { workspace = true }
-tracing-opentelemetry = { workspace = true }

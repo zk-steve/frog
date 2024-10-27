@@ -8,6 +8,7 @@ members = [
   "crates/core",
   "crates/server",
   "crates/worker",
+  "crates/phantom",
   "e2e-tests",
 ]
 
@@ -15,33 +16,40 @@ members = [
 frog_adapter = { path = "crates/adapter" }
 frog_common = { path = "crates/common" }
 frog_core = { path = "crates/core" }
+phantom = { path = "crates/phantom" }
 
 anyhow = { version = "1.0.91" }
 async-trait = { version = "0.1.83" }
 axum = { version = "0.8.0-alpha.1" }
+bincode = { version = "1.3.3" }
 clap = { version = "4.5.17" }
 config = { version = "0.14.0" }
 glob = { version = "0.3.1" }
 graphile_worker = { version = "0.8.0" }
+itertools = { version = "0.13.0" }
+lazy_static = { version = "1.5.0" }
 log = { version = "0.4.22" }
-opentelemetry = { version = "0.26.0" }
-opentelemetry-otlp = { version = "0.26.0" }
-opentelemetry-semantic-conventions = { version = "0.26.0" }
-opentelemetry_sdk = { version = "0.26.0" }
+opentelemetry = { version = "0.27.0" }
+opentelemetry-otlp = { version = "0.27.0" }
+opentelemetry-semantic-conventions = { version = "0.27.0" }
+opentelemetry_sdk = { version = "0.27.0" }
+phantom-zone-evaluator = { version = "0.1.0", git = "https://github.com/gausslabs/phantom-zone", branch = "rewrite", features = [
+  "serde",
+  "dev",
+] }
 prost = { version = "0.13.2" }
-rand = { version = "0.9.0-alpha.2" }
+rand = { version = "0.8.5", features = ["std_rng"] }
 readonly = { version = "0.2.12" }
-reqwest = { version = "0.12.8" }
+reqwest = { version = "0.12.8", features = ["json"] }
 serde = { version = "1.0.210" }
-serde_json = { version = "1.0.132" }
 sqlx = { version = "*" }
 test-log = { version = "0.2.16" }
 testcontainers-modules = { version = "0.11.3" }
-thiserror = { version = "1.0.65" }
+thiserror = { version = "2.0.3" }
 tokio = { version = "1.39.3" }
 tonic = { version = "0.12.2" }
 tower-http = { version = "0.6.1" }
 tracing = { version = "0.1.40" }
 tracing-bunyan-formatter = { version = "0.3.9" }
-tracing-opentelemetry = { version = "0.27.0" }
+tracing-opentelemetry = { version = "0.28.0" }
 tracing-subscriber = { version = "0.3.18" }

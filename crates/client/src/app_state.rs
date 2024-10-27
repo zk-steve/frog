@@ -1,14 +1,14 @@
-#[derive(Clone)]
-pub struct AppState {}
+use std::sync::Arc;
 
-impl Default for AppState {
-    fn default() -> Self {
-        Self::new()
-    }
+use crate::services::session::SessionService;
+
+#[derive(Clone)]
+pub struct AppState {
+    pub session_service: Arc<SessionService>,
 }
 
 impl AppState {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(session_service: Arc<SessionService>) -> Self {
+        Self { session_service }
     }
 }

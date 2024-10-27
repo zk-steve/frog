@@ -1,3 +1,3 @@
-pub mod game;
-pub mod game_client;
-pub mod game_player;
+pub mod peer;
+pub mod session;
+pub mod session_client;

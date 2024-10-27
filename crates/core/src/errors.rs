@@ -5,6 +5,9 @@ pub enum CoreError {
     #[error("parse int error {0}")]
     ParseIntError(#[from] std::num::ParseIntError),
 
+    #[error("parse response error {0}")]
+    ParseResponseError(Error),
+
     #[error("io error {0}")]
     IOError(#[from] std::io::Error),
 
