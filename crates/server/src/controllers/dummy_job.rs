@@ -3,7 +3,7 @@ use std::str;
 
 use axum::body::Bytes;
 use axum::extract::State;
-use common::workers::dummy_worker::{DummyWorkerData, DUMMY_WORKER_IDENTIFIER};
+use frog_common::workers::dummy_worker::{DummyWorkerData, DUMMY_WORKER_IDENTIFIER};
 use tracing::instrument;
 use tracing::log::info;
 use tracing_opentelemetry::OpenTelemetrySpanExt;

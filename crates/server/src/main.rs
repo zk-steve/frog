@@ -1,28 +1,27 @@
-mod app_state;
-mod controllers;
-mod errors;
-mod json_response;
-mod options;
-mod routes;
-
 use std::str::FromStr;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 
 use clap::{Parser, Subcommand};
-use common::cli_args::CliArgs;
-use common::kill_signals;
-use common::loggers::telemetry::init_telemetry;
+use frog_adapter::in_memory::game::GameInMemoryRepository;
+use frog_adapter::in_memory::game_player::GamePlayerInMemoryRepository;
+use frog_adapter::in_memory::state::InMemoryState;
+use frog_common::cli_args::CliArgs;
+use frog_common::kill_signals;
+use frog_common::loggers::telemetry::init_telemetry;
+use frog_core::ports::game::GamePort;
+use frog_core::ports::game_player::GamePlayerPort;
+use frog_server::app_state::AppState;
+use frog_server::options::Options;
+use frog_server::routes::routes;
+use frog_server::services::game::GameService;
+use frog_server::services::game_player::GamePlayerService;
 use graphile_worker::WorkerUtils;
 use opentelemetry::global;
 use sqlx::postgres::PgConnectOptions;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 use tracing::info;
-
-use crate::app_state::AppState;
-use crate::options::Options;
-use crate::routes::routes;
 
 #[tokio::main]
 async fn main() {
@@ -72,9 +71,23 @@ pub async fn serve(options: Options) {
         .await
         .unwrap();
 
-    let worker_utils = Arc::new(WorkerUtils::new(pg_pool, options.worker.schema.clone()));
+    let in_memory_game_state = Arc::new(RwLock::new(InMemoryState::default()));
+    let game_port: Arc<dyn GamePort + Send + Sync> =
+        Arc::new(GameInMemoryRepository::new(in_memory_game_state.clone()));
+    let game_player_port: Arc<dyn GamePlayerPort + Send + Sync> = Arc::new(
+        GamePlayerInMemoryRepository::new(in_memory_game_state.clone()),
+    );
 
-    let routes = routes(AppState::new(worker_utils)).layer((
+    let worker_utils = Arc::new(WorkerUtils::new(pg_pool, options.worker.schema.clone()));
+    let game_service = Arc::new(GameService::new(game_port));
+    let game_player_service = Arc::new(GamePlayerService::new(game_player_port));
+
+    let routes = routes(AppState::new(
+        worker_utils,
+        game_service,
+        game_player_service,
+    ))
+    .layer((
         TraceLayer::new_for_http(),
         // Graceful shutdown will wait for outstanding requests to complete. Add a timeout so
         // requests don't hang forever.

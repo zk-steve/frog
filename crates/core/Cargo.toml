@@ -1,0 +1,10 @@
+[package]
+name = "frog_core"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }
