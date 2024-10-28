@@ -32,7 +32,7 @@ prost = { version = "0.13.2" }
 rand = { version = "0.9.0-alpha.2" }
 readonly = { version = "0.2.12" }
 reqwest = { version = "0.12.8" }
-serde = { version = "1.0.210" }
+serde = { version = "1.0.214" }
 serde_json = { version = "1.0.132" }
 sqlx = { version = "*" }
 test-log = { version = "0.2.16" }
