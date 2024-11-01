@@ -16,7 +16,7 @@ frog_adapter = { path = "crates/adapter" }
 frog_common = { path = "crates/common" }
 frog_core = { path = "crates/core" }
 
-anyhow = { version = "1.0.91" }
+anyhow = { version = "1.0.92" }
 async-trait = { version = "0.1.83" }
 axum = { version = "0.8.0-alpha.1" }
 clap = { version = "4.5.17" }
