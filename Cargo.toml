@@ -37,7 +37,7 @@ serde_json = { version = "1.0.132" }
 sqlx = { version = "*" }
 test-log = { version = "0.2.16" }
 testcontainers-modules = { version = "0.11.3" }
-thiserror = { version = "1.0.65" }
+thiserror = { version = "1.0.66" }
 tokio = { version = "1.39.3" }
 tonic = { version = "0.12.2" }
 tower-http = { version = "0.6.1" }
