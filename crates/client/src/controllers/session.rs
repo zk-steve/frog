@@ -12,3 +12,11 @@ pub async fn get_decryption_share(
     let result = app_state.session_service.get_share().await?;
     Ok(JsonResponse(result))
 }
+
+#[instrument(level = "info", skip(app_state))]
+pub async fn get_result(
+    State(app_state): State<AppState>,
+) -> Result<JsonResponse<Option<u64>>, AppError> {
+    let result = app_state.session_service.get_result().await?;
+    Ok(JsonResponse(result))
+}

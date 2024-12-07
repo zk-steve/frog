@@ -16,7 +16,7 @@ pub struct SessionEntity {
     pub client_info: HashMap<ClientId, ClientEntity>,
 
     pub pk: Vec<u8>,
-    pub result: Vec<Vec<u8>>,
+    pub encrypted_result: Vec<Vec<u8>>,
 
     #[serde(skip_serializing, skip_deserializing)]
     pub phantom_server: Option<PhantomServer<NativeOps>>,
@@ -28,7 +28,7 @@ impl SessionEntity {
             id,
             status: SessionStatus::WaitingForClients,
             client_info: Default::default(),
-            result: Default::default(),
+            encrypted_result: Default::default(),
             pk: Default::default(),
             phantom_server: Some(PhantomServer::new(phantom_param, crs, None, None, None).unwrap()),
         }

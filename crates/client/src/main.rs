@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -116,37 +117,12 @@ pub async fn serve(options: Options) {
     ));
 
     let server = tokio::spawn(listen(options.server.clone(), session_service.clone()));
-
-    session_service.join().await.unwrap();
-    session_service
-        .wait(SessionStatus::WaitingForBootstrap)
-        .await
-        .unwrap();
-    session_service.update_pk().await.unwrap();
-    session_service.bootstrap().await.unwrap();
-    session_service
-        .wait(SessionStatus::WaitingForArgument)
-        .await
-        .unwrap();
-    session_service.send_secret_data().await.unwrap();
-    session_service.wait(SessionStatus::Done).await.unwrap();
-    session_service.fetch_result().await.unwrap();
-
-    let mut dec_shares = vec![];
-    for endpoint in options.client.peer_endpoints.values() {
-        loop {
-            let dec_share = peer_client.get_dec_share(endpoint).await.unwrap();
-            if !dec_share.is_empty() {
-                dec_shares.push(dec_share);
-                break;
-            }
-            sleep(Duration::from_secs(1)).await;
-        }
-    }
-    let result = session_service.dec(dec_shares).await.unwrap();
-    info!("result: {:?}", result);
-
-    tokio::try_join!(server).expect("Failed to run server");
+    let main_flow = tokio::spawn(main_flow(
+        session_service.clone(),
+        peer_client.clone(),
+        options.client.peer_endpoints.clone(),
+    ));
+    tokio::try_join!(main_flow, server).expect("Failed to run server");
 }
 
 async fn listen(server: Server, session_service: Arc<SessionService>) {
@@ -166,4 +142,39 @@ async fn listen(server: Server, session_service: Arc<SessionService>) {
         .with_graceful_shutdown(kill_signals::wait_for_kill_signals())
         .await
         .unwrap();
+}
+
+async fn main_flow(
+    session_service: Arc<SessionService>,
+    peer_client: Arc<dyn PeerPort + Sync + Send>,
+    peer_endpoints: HashMap<String, String>,
+) {
+    session_service.join().await.unwrap();
+    session_service
+        .wait(SessionStatus::WaitingForBootstrap)
+        .await
+        .unwrap();
+    session_service.update_pk().await.unwrap();
+    session_service.bootstrap().await.unwrap();
+    session_service
+        .wait(SessionStatus::WaitingForArgument)
+        .await
+        .unwrap();
+    session_service.send_secret_data().await.unwrap();
+    session_service.wait(SessionStatus::Done).await.unwrap();
+    session_service.fetch_encrypted_result().await.unwrap();
+
+    let mut dec_shares = vec![];
+    for endpoint in peer_endpoints.values() {
+        loop {
+            let dec_share = peer_client.get_dec_share(endpoint).await.unwrap();
+            if !dec_share.is_empty() {
+                dec_shares.push(dec_share);
+                break;
+            }
+            sleep(Duration::from_secs(1)).await;
+        }
+    }
+    let result = session_service.decrypt_result(dec_shares).await.unwrap();
+    info!("RESULT: {}", result);
 }

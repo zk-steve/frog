@@ -82,6 +82,7 @@ pub async fn serve(options: Options) {
     crs_seed[..len].copy_from_slice(&bytes[..len]);
 
     let crs = Crs::new(crs_seed);
+
     let phantom_param = Param {
         param: I_2P_60,
         ring_packing_modulus: Some(Modulus::Prime(2305843009213554689)),

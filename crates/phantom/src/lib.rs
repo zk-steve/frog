@@ -745,6 +745,13 @@ pub fn u64_to_binary<const N: usize>(v: u64) -> Vec<bool> {
     result
 }
 
+pub fn binary_to_u64(v: Vec<bool>) -> u64 {
+    assert!(v.len() <= 64);
+    v.iter()
+        .enumerate()
+        .fold(0u64, |acc, (i, &bit)| acc | ((bit as u64) << i))
+}
+
 pub const I_2P_60: FhewBoolMpiParam = FhewBoolMpiParam {
     param: FhewBoolParam {
         message_bits: 2,

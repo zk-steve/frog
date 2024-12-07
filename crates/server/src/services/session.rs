@@ -164,7 +164,7 @@ impl SessionService {
                 .into_iter()
                 .map(|t| phantom_server.serialize_ct(t).unwrap())
                 .collect::<Vec<_>>();
-            session_entity.result = ct_out;
+            session_entity.encrypted_result = ct_out;
             session_entity.status = SessionStatus::Done;
         }
         self.session.update(session_id, session_entity).await?;

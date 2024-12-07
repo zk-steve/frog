@@ -27,7 +27,7 @@ pub struct Options {
 /// Represents server configuration.
 #[derive(Debug, Deserialize, Clone)]
 pub struct Client {
-    /// The endpoint of the game server.
+    /// The endpoint of the server.
     pub server_endpoint: String,
     /// Client ID
     pub client_id: ClientId,

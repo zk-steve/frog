@@ -5,7 +5,7 @@ use frog_core::entities::client::{ClientEntity, ClientId};
 use frog_core::entities::session::{SessionId, SessionStatus};
 use frog_core::ports::session_client::SessionClientPort;
 use phantom::phantom_zone::{Client, NativeOps, Ops};
-use phantom::u64_to_binary;
+use phantom::{binary_to_u64, u64_to_binary};
 use tokio::sync::RwLock;
 use tokio::time;
 use tracing::debug;
@@ -15,7 +15,8 @@ use crate::errors::AppError;
 pub struct SessionService {
     client_id: ClientId,
     dec_share: Arc<RwLock<Vec<u8>>>,
-    ct: Arc<RwLock<Vec<Vec<u8>>>>,
+    encrypted_result: Arc<RwLock<Vec<Vec<u8>>>>,
+    result: Arc<RwLock<Option<u64>>>,
 
     session_client: Arc<dyn SessionClientPort + Sync + Send>,
     phantom_client: Arc<RwLock<Client<NativeOps>>>,
@@ -30,7 +31,8 @@ impl SessionService {
         Self {
             client_id,
             dec_share: Default::default(),
-            ct: Default::default(),
+            encrypted_result: Default::default(),
+            result: Default::default(),
             session_client,
             phantom_client,
         }
@@ -113,19 +115,19 @@ impl SessionService {
         Ok(())
     }
 
-    pub async fn fetch_result(&self) -> Result<(), AppError> {
+    pub async fn fetch_encrypted_result(&self) -> Result<(), AppError> {
         let session_entity = self
             .session_client
             .get_session(SessionId("0".to_string()))
             .await?;
         let client = self.phantom_client.read().await;
         let dec_shares = session_entity
-            .result
+            .encrypted_result
             .iter()
             .map(|ct| client.decrypt_share(&client.deserialize_ct(ct).unwrap()))
             .collect::<Vec<_>>();
         *self.dec_share.write().await = client.serialize_dec_shares(&dec_shares)?;
-        *self.ct.write().await = session_entity.result;
+        *self.encrypted_result.write().await = session_entity.encrypted_result;
         Ok(())
     }
 
@@ -133,11 +135,15 @@ impl SessionService {
         Ok(self.dec_share.read().await.clone())
     }
 
-    pub async fn dec(&self, mut dec_shares: Vec<Vec<u8>>) -> Result<Vec<bool>, AppError> {
+    pub async fn get_result(&self) -> Result<Option<u64>, AppError> {
+        Ok(*self.result.read().await)
+    }
+
+    pub async fn decrypt_result(&self, mut dec_shares: Vec<Vec<u8>>) -> Result<u64, AppError> {
         let client = self.phantom_client.read().await;
 
         let ct_out = &self
-            .ct
+            .encrypted_result
             .read()
             .await
             .iter()
@@ -159,7 +165,8 @@ impl SessionService {
                 )
             })
             .collect::<Vec<_>>();
-
+        let result = binary_to_u64(result);
+        *self.result.write().await = Some(result);
         Ok(result)
     }
 }

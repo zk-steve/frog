@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 log = { workspace = true }
 rand = { workspace = true }
+reqwest = { workspace = true }
 testcontainers-modules = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 

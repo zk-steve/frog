@@ -759,6 +759,7 @@ version = "0.1.0"
 dependencies = [
  "log",
  "rand",
+ "reqwest",
  "test-log",
  "testcontainers-modules",
  "tokio",
