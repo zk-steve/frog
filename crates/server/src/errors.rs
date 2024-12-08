@@ -21,6 +21,10 @@ pub enum AppError {
     CoreError(#[from] CoreError),
     #[error("graphile worker error")]
     GraphileWorkerError(#[from] GraphileWorkerError),
+    #[error("session error {0}")]
+    SessionError(String),
+    #[error("bincode error")]
+    BincodeError(#[from] bincode::Error),
 }
 
 // Tell axum how `AppError` should be converted into a response.
@@ -42,19 +46,17 @@ impl IntoResponse for AppError {
             AppError::GraphileWorkerError(error) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, error.to_string())
             }
-            // AppError::TimeError(err) => {
-            //     // Because `TraceLayer` wraps each request in a span that contains the request
-            //     // method, uri, etc we don't need to include those details here
-            //     tracing::error!(%err, "error from time_library");
-            //
-            //     // Don't expose any details about the error to the client
-            //     (
-            //         StatusCode::INTERNAL_SERVER_ERROR,
-            //         "Something went wrong".to_owned(),
-            //     )
-            // }
-            _ => {
-                panic!()
+            AppError::SessionError(error) => (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
+            e => {
+                // Because `TraceLayer` wraps each request in a span that contains the request
+                // method, uri, etc we don't need to include those details here
+                tracing::error!(%e, "unknown error");
+
+                // Don't expose any details about the error to the client
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Something went wrong".to_owned(),
+                )
             }
         };
         (status, JsonResponse(ErrorResponse { message })).into_response()

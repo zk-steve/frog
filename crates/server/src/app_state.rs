@@ -2,26 +2,19 @@ use std::sync::Arc;
 
 use graphile_worker::WorkerUtils;
 
-use crate::services::game::GameService;
-use crate::services::game_player::GamePlayerService;
+use crate::services::session::SessionService;
 
 #[derive(Clone)]
 pub struct AppState {
     pub worker_utils: Arc<WorkerUtils>,
-    pub game_service: Arc<GameService>,
-    pub game_player_service: Arc<GamePlayerService>,
+    pub session_service: Arc<SessionService>,
 }
 
 impl AppState {
-    pub fn new(
-        worker_utils: Arc<WorkerUtils>,
-        game_service: Arc<GameService>,
-        game_player_service: Arc<GamePlayerService>,
-    ) -> Self {
+    pub fn new(worker_utils: Arc<WorkerUtils>, session_service: Arc<SessionService>) -> Self {
         Self {
             worker_utils,
-            game_service,
-            game_player_service,
+            session_service,
         }
     }
 }

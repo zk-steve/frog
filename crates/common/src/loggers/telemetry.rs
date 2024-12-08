@@ -1,7 +1,8 @@
-use opentelemetry::trace::TracerProvider;
+use opentelemetry::trace::TracerProvider as TracerProviderTrait;
 use opentelemetry::{global, KeyValue};
-use opentelemetry_otlp::WithExportConfig;
+use opentelemetry_otlp::{SpanExporter, WithExportConfig};
 use opentelemetry_sdk::propagation::TraceContextPropagator;
+use opentelemetry_sdk::trace::TracerProvider;
 use opentelemetry_sdk::{runtime, trace, Resource};
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
@@ -24,22 +25,22 @@ use tracing_subscriber::{EnvFilter, Registry};
 ///
 pub fn init_telemetry(service_name: &str, exporter_endpoint: &str, log_level: &str) {
     // Create a gRPC exporter
-    let exporter = opentelemetry_otlp::new_exporter()
-        .tonic()
-        .with_endpoint(exporter_endpoint);
+    let exporter = SpanExporter::builder()
+        .with_tonic()
+        .with_endpoint(exporter_endpoint)
+        .build()
+        .expect("Error: failed to initialize exporter.");
 
     // Define a tracer
-    let tracer = opentelemetry_otlp::new_pipeline()
-        .tracing()
-        .with_exporter(exporter)
-        .with_trace_config(trace::Config::default().with_resource(Resource::new(vec![
-            KeyValue::new(
+    let tracer = TracerProvider::builder()
+        .with_batch_exporter(exporter, runtime::Tokio)
+        .with_config(
+            trace::Config::default().with_resource(Resource::new(vec![KeyValue::new(
                 opentelemetry_semantic_conventions::resource::SERVICE_NAME,
                 service_name.to_string(),
-            ),
-        ])))
-        .install_batch(runtime::Tokio)
-        .expect("Error: Failed to initialize the tracer.")
+            )])),
+        )
+        .build()
         .tracer(service_name.to_string());
 
     // Define a subscriber

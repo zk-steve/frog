@@ -6,11 +6,14 @@ build = "build.rs"
 
 [dependencies]
 axum = { workspace = true, features = ["macros"] }
+bincode = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 frog_adapter = { workspace = true }
 frog_common = { workspace = true }
 frog_core = { workspace = true }
 opentelemetry = { workspace = true }
+phantom = { workspace = true }
+phantom-zone-evaluator = { workspace = true }
 readonly = { workspace = true }
 reqwest = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

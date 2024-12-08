@@ -114,11 +114,7 @@ impl Program {
                         panic!("Program exited early with {}", status);
                     }
                     if attempts == 0 {
-                        panic!(
-                            "Failed to connect to {}: {}",
-                            format!("{}:{}", &self.url, &self.port),
-                            err
-                        );
+                        panic!("Failed to connect to {}:{}: {}", &self.url, &self.port, err);
                     }
                 }
             };

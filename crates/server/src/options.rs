@@ -18,6 +18,8 @@ pub struct Options {
     pub exporter_endpoint: String,
     /// The name of the service.
     pub service_name: String,
+    /// Configuration for the phantom server.
+    pub phantom_server: PhantomServer,
     /// Configuration for logging, including log level.
     #[serde(default = "default_log")]
     pub log: Log,
@@ -30,6 +32,15 @@ pub struct Server {
     pub port: u16,
     /// URL for the server.
     pub url: String,
+}
+
+/// Represents phantom server configuration.
+#[derive(Debug, Deserialize, Clone)]
+pub struct PhantomServer {
+    /// Crs Seed
+    pub crs_seed: String,
+    /// Participant number
+    pub participant_number: usize,
 }
 
 /// Represents worker configuration.
