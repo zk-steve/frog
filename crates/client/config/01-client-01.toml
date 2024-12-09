@@ -2,12 +2,12 @@ exporter_endpoint = "http://localhost:7281"
 service_name = "frog-client"
 
 [server]
-port = 8001
+port = 8002
 url = "0.0.0.0"
 
 [client]
 server_endpoint = "http://localhost:8000"
-client_id = "0"
+client_id = "1"
 crs_seed = "crs_seed_32_bytes_123456789_123456789_123456789"
-client_seed = "client0"
-peer_endpoints = { 1 = "http://localhost:8002" }
+client_seed = "client1"
+peer_endpoints = { 1 = "http://localhost:8001" }
