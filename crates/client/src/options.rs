@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use frog_common::options::{default_log, Log};
 use frog_core::entities::client::ClientId;
+use frog_core::entities::session::SessionId;
 use serde::Deserialize;
 
 /// Configuration options for the application.
@@ -37,6 +38,8 @@ pub struct Client {
     pub client_seed: String,
     /// The endpoints of other clients (client, end_point).
     pub peer_endpoints: HashMap<String, String>,
+    /// Session ID
+    pub session_id: SessionId,
 }
 
 /// Represents server configuration.

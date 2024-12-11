@@ -56,13 +56,13 @@ impl SessionPort for SessionInMemoryRepository {
         Ok(session_id)
     }
 
-    async fn delete(&self, session_id: SessionId) -> Result<SessionId, CoreError> {
+    async fn delete(&self, session_id: SessionId) -> Result<(), CoreError> {
         self.inner_state
             .write()
             .unwrap()
             .sessions
             .remove(&session_id)
             .ok_or(CoreError::NotFound)?;
-        Ok(session_id)
+        Ok(())
     }
 }

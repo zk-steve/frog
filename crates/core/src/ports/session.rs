@@ -12,5 +12,5 @@ pub trait SessionPort {
         session_id: SessionId,
         session_entity: SessionEntity,
     ) -> Result<SessionId, CoreError>;
-    async fn delete(&self, session_id: SessionId) -> Result<SessionId, CoreError>;
+    async fn delete(&self, session_id: SessionId) -> Result<(), CoreError>;
 }
