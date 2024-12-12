@@ -57,7 +57,7 @@ pub fn routes(app_state: AppState) -> Router {
                 .with_state(app_state),
         )
         .route("/health", get(root))
-        .layer(TimeoutLayer::new(Duration::from_secs(120)))
+        .layer(TimeoutLayer::new(Duration::from_secs(600)))
         .fallback(handler_404)
 }
 
