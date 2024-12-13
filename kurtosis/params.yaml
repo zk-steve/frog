@@ -16,14 +16,15 @@ args:
   global_log_level: info
 
   server:
-    image: zksteve/frog-server:v0.0.1-3-g09dffcd
+    image: zksteve/frog-server:v0.0.1-12-g4c5c37f
     # http_port: 8080
 
   client:
-    image: zksteve/frog-client:v0.0.1-3-g09dffcd
+    image: zksteve/frog-client:v0.0.1-12-g4c5c37f
+    participants: 2
     # http_port: 8080
 
   worker:
-    image: zksteve/frog-worker:v0.0.1-3-g09dffcd
+    image: zksteve/frog-worker:v0.0.1-12-g4c5c37f
     # http_port: 8080
     concurrent: 4

@@ -9,5 +9,9 @@ port = {{$.http_port}}
 url = "{{$.pg_url}}"
 max_size = 10
 
+[phantom_server]
+crs_seed = "{{$.crs_seed}}"
+participant_number = {{$.participant_number}}
+
 [worker]
 schema = "{{$.schema}}"

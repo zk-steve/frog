@@ -2,6 +2,8 @@ def apply_default(args):
     return {
         "image": "zksteve/frog-server:latest",
         "name": "frog-server",
+        "crs_seed": "crs_seed_32_bytes_123456789_123456789_123456789",
+        "participant_number": 2,
         "http_port": 9944,
     } | args
 
@@ -15,7 +17,7 @@ def start(plan, args, suffix):
         wait=None,
     )
 
-    name = args["name"] + suffix
+    name = get_server_name(args, suffix)
     postgres_service = plan.get_service(name="postgres" + suffix)
     postgres_port = postgres_service.ports["postgres"].number
     postgres_address = postgres_service.ip_address
@@ -49,3 +51,8 @@ def start(plan, args, suffix):
             files={"/user/": custom_config},
         ),
     )
+
+
+def get_server_name(args, suffix):
+    args = apply_default(args)
+    return args["name"] + suffix

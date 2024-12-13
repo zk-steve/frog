@@ -17,11 +17,14 @@ Learn more about the system's architecture [here](docs/architecture.md).
 
 ## Future Plans
 
-- [ ] Finalize ~~Docker~~ and Kurtosis configurations to simplify deployment on Docker or Kubernetes.
-- [ ] Add more documentation and comments in the codebase to enhance maintainability and usability.
-- [ ] Move Phantom related params from saving in DB into a dedicated file storage (like S3) for better performance.
+- [x] ~~Finalize Docker and Kurtosis configurations to simplify deployment on Docker or Kubernetes.~~
+- [ ] Add comprehensive documentation and comments in the codebase to improve maintainability and usability.
+- [ ] Transition Phantom-related parameters from being stored in the database to a dedicated file storage solution (
+  e.g., S3) for better performance.
 - [x] ~~Complete the implementation of the worker service and database (currently, the server processes tasks and stores
-  data locally)~~.
+  data locally).~~
 - [ ] Develop a toolkit similar to [Ignite](https://github.com/ignite/cli) to streamline the development process with a
   CLI for scaffolding and managing projects.
-- [ ] Smarter way to handle common params.
+- [ ] Implement a more efficient method for handling common parameters.
+- [ ] Facilitate client communication through the server (using WebSockets) rather than direct interaction, enabling
+  easier communication when clients are in different private networks.
