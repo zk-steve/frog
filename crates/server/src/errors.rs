@@ -47,6 +47,7 @@ impl IntoResponse for AppError {
                 (StatusCode::INTERNAL_SERVER_ERROR, error.to_string())
             }
             AppError::SessionError(error) => (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
+            AppError::CoreError(error) => (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
             e => {
                 // Because `TraceLayer` wraps each request in a span that contains the request
                 // method, uri, etc we don't need to include those details here

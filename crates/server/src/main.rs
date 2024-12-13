@@ -1,10 +1,12 @@
 use std::str::FromStr;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 use std::time::Duration;
 
 use clap::{Parser, Subcommand};
-use frog_adapter::in_memory::session::SessionInMemoryRepository;
-use frog_adapter::in_memory::state::InMemoryState;
+use deadpool_diesel::postgres::Pool;
+use deadpool_diesel::{Manager, Runtime};
+use diesel_migrations::MigrationHarness;
+use frog_adapter::postgres::session_db::{SessionDBRepository, MIGRATIONS};
 use frog_common::cli_args::CliArgs;
 use frog_common::kill_signals;
 use frog_common::loggers::telemetry::init_telemetry;
@@ -15,8 +17,9 @@ use frog_server::routes::routes;
 use frog_server::services::session::SessionService;
 use graphile_worker::WorkerUtils;
 use opentelemetry::global;
-use phantom::phantom_zone::{Crs, Param};
-use phantom::I_2P_60;
+use phantom::crs::Crs;
+use phantom::param::Param;
+use phantom::utils::I_2P_60;
 use phantom_zone_evaluator::boolean::fhew::prelude::{DecompositionParam, Modulus};
 use sqlx::postgres::PgConnectOptions;
 use tower_http::timeout::TimeoutLayer;
@@ -71,9 +74,25 @@ pub async fn serve(options: Options) {
         .await
         .unwrap();
 
-    let in_memory_session_state = Arc::new(RwLock::new(InMemoryState::default()));
-    let session_port: Arc<dyn SessionPort + Send + Sync> =
-        Arc::new(SessionInMemoryRepository::new(in_memory_session_state));
+    let manager = Manager::new(&options.pg.url, Runtime::Tokio1);
+    let pool = Pool::builder(manager)
+        .max_size(options.pg.max_size as usize)
+        .build()
+        .unwrap();
+
+    // Migration the database
+    let conn = pool.get().await.unwrap();
+    let _ = conn
+        .interact(|connection| {
+            let result = MigrationHarness::run_pending_migrations(connection, MIGRATIONS);
+            match result {
+                Ok(_) => Ok(()),
+                Err(err) => Err(err),
+            }
+        })
+        .await;
+
+    let session_port: Arc<dyn SessionPort + Send + Sync> = Arc::new(SessionDBRepository::new(pool));
 
     // Parse and pad the crs seed from config
     let mut crs_seed = [0u8; 32]; // Create a zero-filled array of 32 bytes
@@ -99,20 +118,23 @@ pub async fn serve(options: Options) {
         crs,
         options.phantom_server.participant_number,
     ));
+    session_service.delete().await.unwrap();
     session_service.create().await.unwrap();
 
     let routes = routes(AppState::new(worker_utils, session_service)).layer((
         TraceLayer::new_for_http(),
         // Graceful shutdown will wait for outstanding requests to complete. Add a timeout so
         // requests don't hang forever.
-        TimeoutLayer::new(Duration::from_secs(10)),
+        TimeoutLayer::new(Duration::from_secs(5 * 60)),
     ));
 
     let endpoint = format!("{}:{}", options.server.url.as_str(), options.server.port);
     let listener = tokio::net::TcpListener::bind(endpoint.clone())
         .await
         .unwrap();
+
     info!("listening on http://{}", endpoint);
+
     axum::serve(listener, routes)
         .with_graceful_shutdown(kill_signals::wait_for_kill_signals())
         .await

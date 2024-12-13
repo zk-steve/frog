@@ -22,7 +22,8 @@ pub async fn get_session(
     Path(id): Path<String>,
     State(app_state): State<AppState>,
 ) -> Result<JsonResponse<SessionEntity>, AppError> {
-    let session_entity = app_state.session_service.get_session(SessionId(id)).await?;
+    let session_id = SessionId::try_from(id.as_str())?;
+    let session_entity = app_state.session_service.get_session(session_id).await?;
     Ok(JsonResponse(session_entity))
 }
 
@@ -32,7 +33,8 @@ pub async fn join_session(
     State(app_state): State<AppState>,
     Json(input): Json<ClientEntity>,
 ) -> Result<JsonResponse<()>, AppError> {
-    app_state.session_service.join(SessionId(id), input).await?;
+    let session_id = SessionId::try_from(id.as_str())?;
+    app_state.session_service.join(session_id, input).await?;
     Ok(JsonResponse(()))
 }
 
@@ -42,9 +44,10 @@ pub async fn bootstrap_client(
     State(app_state): State<AppState>,
     Json(bs_key): Json<Vec<u8>>,
 ) -> Result<JsonResponse<()>, AppError> {
+    let session_id = SessionId::try_from(id.as_str())?;
     app_state
         .session_service
-        .bootstrap(SessionId(id), ClientId(client_id), bs_key)
+        .bootstrap(session_id, ClientId(client_id), bs_key)
         .await?;
     Ok(JsonResponse(()))
 }
@@ -55,9 +58,10 @@ pub async fn add_data(
     State(app_state): State<AppState>,
     Json(data): Json<Vec<u8>>,
 ) -> Result<JsonResponse<()>, AppError> {
+    let session_id = SessionId::try_from(id.as_str())?;
     app_state
         .session_service
-        .add_data(SessionId(id), ClientId(client_id), data)
+        .add_data(session_id, ClientId(client_id), data)
         .await?;
     Ok(JsonResponse(()))
 }

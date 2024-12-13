@@ -4,8 +4,10 @@ use std::time::Duration;
 use frog_core::entities::client::{ClientEntity, ClientId};
 use frog_core::entities::session::{SessionId, SessionStatus};
 use frog_core::ports::session_client::SessionClientPort;
-use phantom::phantom_zone::{Client, NativeOps, Ops};
-use phantom::{binary_to_u64, u64_to_binary};
+use phantom::client::Client;
+use phantom::native_ops::NativeOps;
+use phantom::ops::Ops;
+use phantom::utils::{binary_to_u64, u64_to_binary};
 use tokio::sync::RwLock;
 use tokio::time;
 use tracing::debug;
@@ -14,6 +16,7 @@ use crate::errors::AppError;
 
 pub struct SessionService {
     client_id: ClientId,
+    session_id: SessionId,
     dec_share: Arc<RwLock<Vec<u8>>>,
     encrypted_result: Arc<RwLock<Vec<Vec<u8>>>>,
     result: Arc<RwLock<Option<u64>>>,
@@ -25,11 +28,13 @@ pub struct SessionService {
 impl SessionService {
     pub fn new(
         client_id: ClientId,
+        session_id: SessionId,
         session_client: Arc<dyn SessionClientPort + Sync + Send>,
         phantom_client: Arc<RwLock<Client<NativeOps>>>,
     ) -> Self {
         Self {
             client_id,
+            session_id,
             dec_share: Default::default(),
             encrypted_result: Default::default(),
             result: Default::default(),
@@ -51,7 +56,7 @@ impl SessionService {
 
         self.session_client
             .join_session(
-                SessionId("0".to_string()),
+                self.session_id.clone(),
                 ClientEntity::new(self.client_id.clone(), pk_share, rp_key_share),
             )
             .await?;
@@ -63,7 +68,7 @@ impl SessionService {
 
         let bs_key = client.serialize_bs_key_share(&client.bs_key_share_gen())?;
         self.session_client
-            .bootstrap(SessionId("0".to_string()), self.client_id.clone(), bs_key)
+            .bootstrap(self.session_id.clone(), self.client_id.clone(), bs_key)
             .await?;
         Ok(())
     }
@@ -72,7 +77,7 @@ impl SessionService {
         loop {
             let session_entity = self
                 .session_client
-                .get_session(SessionId("0".to_string()))
+                .get_session(self.session_id.clone())
                 .await?;
             debug!("Session status: {:?}", session_entity.status);
             if session_entity.status == session_status {
@@ -87,7 +92,7 @@ impl SessionService {
     pub async fn update_pk(&self) -> Result<(), AppError> {
         let session_entity = self
             .session_client
-            .get_session(SessionId("0".to_string()))
+            .get_session(self.session_id.clone())
             .await?;
         if session_entity.status != SessionStatus::WaitingForBootstrap {
             panic!("TODO:");
@@ -107,7 +112,7 @@ impl SessionService {
             client.serialize_batched_ct(&client.batched_pk_encrypt(input.into_iter()))?;
         self.session_client
             .send_data(
-                SessionId("0".to_string()),
+                self.session_id.clone(),
                 self.client_id.clone(),
                 encrypted_data,
             )
@@ -118,7 +123,7 @@ impl SessionService {
     pub async fn fetch_encrypted_result(&self) -> Result<(), AppError> {
         let session_entity = self
             .session_client
-            .get_session(SessionId("0".to_string()))
+            .get_session(self.session_id.clone())
             .await?;
         let client = self.phantom_client.read().await;
         let dec_shares = session_entity

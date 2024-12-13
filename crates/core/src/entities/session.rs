@@ -1,11 +1,16 @@
 use std::collections::HashMap;
 use std::fmt;
-use std::io::{Error, ErrorKind};
+use std::str::FromStr;
 
-use phantom::phantom_zone::{Crs, NativeOps, Param, PhantomServer};
+use phantom::crs::Crs;
+use phantom::native_ops::NativeOps;
+use phantom::param::Param;
+use phantom::server::PhantomServer;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::entities::client::{ClientEntity, ClientId};
+use crate::errors::CoreError;
 
 /// Represents a session entity.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -36,16 +41,15 @@ impl SessionEntity {
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, Hash, PartialEq, Clone)]
-pub struct SessionId(pub String);
+pub struct SessionId(pub Uuid);
 
 impl TryFrom<&str> for SessionId {
-    type Error = Error;
+    type Error = CoreError;
 
     fn try_from(id: &str) -> Result<Self, Self::Error> {
-        match id.is_empty() {
-            false => Ok(SessionId(id.to_string())),
-            true => Err(Error::new(ErrorKind::InvalidInput, "No id provided")),
-        }
+        Ok(SessionId(
+            Uuid::from_str(id).map_err(CoreError::ParseIdError)?,
+        ))
     }
 }
 
@@ -61,4 +65,29 @@ pub enum SessionStatus {
     WaitingForBootstrap,
     WaitingForArgument,
     Done,
+}
+
+impl FromStr for SessionStatus {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "WaitingForClients" => Ok(SessionStatus::WaitingForClients),
+            "WaitingForBootstrap" => Ok(SessionStatus::WaitingForBootstrap),
+            "WaitingForArgument" => Ok(SessionStatus::WaitingForArgument),
+            "Done" => Ok(SessionStatus::Done),
+            _ => Err(format!("'{}' is not a valid status", s)),
+        }
+    }
+}
+
+impl fmt::Display for SessionStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            SessionStatus::WaitingForClients => write!(f, "WaitingForClients"),
+            SessionStatus::WaitingForBootstrap => write!(f, "WaitingForBootstrap"),
+            SessionStatus::WaitingForArgument => write!(f, "WaitingForArgument"),
+            SessionStatus::Done => write!(f, "Done"),
+        }
+    }
 }

@@ -16,8 +16,11 @@ use frog_core::entities::session::SessionStatus;
 use frog_core::ports::peer::PeerPort;
 use frog_core::ports::session_client::SessionClientPort;
 use opentelemetry::global;
-use phantom::phantom_zone::{Client, Crs, NativeOps, Param};
-use phantom::I_2P_60;
+use phantom::client::Client;
+use phantom::crs::Crs;
+use phantom::native_ops::NativeOps;
+use phantom::param::Param;
+use phantom::utils::I_2P_60;
 use phantom_zone_evaluator::boolean::fhew::prelude::{DecompositionParam, Modulus};
 use tokio::sync::RwLock;
 use tokio::time::sleep;
@@ -112,6 +115,7 @@ pub async fn serve(options: Options) {
 
     let session_service = Arc::new(SessionService::new(
         options.client.client_id.clone(),
+        options.client.session_id.clone(),
         session_client,
         phantom_client.clone(),
     ));

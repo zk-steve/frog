@@ -11,3 +11,4 @@ client_id = "1"
 crs_seed = "crs_seed_32_bytes_123456789_123456789_123456789"
 client_seed = "client1"
 peer_endpoints = { 1 = "http://localhost:8001" }
+session_id = "f8e774bd-2f9d-4502-92ca-ac8b9c25868e"

@@ -8,11 +8,12 @@ build = "build.rs"
 axum = { workspace = true, features = ["macros"] }
 bincode = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
+deadpool-diesel = { workspace = true, features = ["postgres", "serde"] }
+diesel_migrations = { workspace = true }
 frog_adapter = { workspace = true }
 frog_common = { workspace = true }
 frog_core = { workspace = true }
 graphile_worker = { workspace = true }
-lazy_static = { workspace = true }
 opentelemetry = { workspace = true }
 phantom = { workspace = true }
 phantom-zone-evaluator = { workspace = true }
@@ -27,5 +28,6 @@ sqlx = { workspace = true, features = [
 ] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
+tower = { workspace = true, features = ["timeout"] }
 tower-http = { workspace = true, features = ["timeout", "trace", "limit"] }
 tracing = { workspace = true }

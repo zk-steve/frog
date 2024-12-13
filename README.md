@@ -18,8 +18,9 @@ Learn more about the system's architecture [here](docs/architecture.md).
 ## Future Plans
 
 - [ ] Finalize Docker and Kurtosis configurations to simplify deployment on Docker or Kubernetes.
-- [ ] Complete the implementation of the worker service and database (currently, the server processes tasks and stores
-  data locally).
+- [ ] Complete the implementation of the worker service ~~and database (currently, the server processes tasks and stores
+  data locally)~~.
 - [ ] Develop a toolkit similar to [Ignite](https://github.com/ignite/cli) to streamline the development process with a
   CLI for scaffolding and managing projects.
+- [ ] Smarter way to handle common params.
 - [ ] Add more documentation and comments in the codebase to enhance maintainability and usability.

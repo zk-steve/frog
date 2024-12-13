@@ -5,5 +5,17 @@ edition = "2021"
 
 [dependencies]
 async-trait = { workspace = true }
+bincode = { workspace = true }
+deadpool-diesel = { workspace = true, features = ["postgres", "serde"] }
+diesel = { workspace = true, features = [
+  "postgres",
+  "postgres_backend",
+  "uuid",
+  "serde_json",
+] }
+diesel_migrations = { workspace = true }
 frog_core = { workspace = true }
+log = { workspace = true }
 reqwest = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+uuid = { workspace = true }

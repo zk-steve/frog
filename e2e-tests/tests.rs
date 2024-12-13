@@ -51,6 +51,7 @@ mod tests {
 
         let mut server_envs = setup_config.envs.clone();
         let crs_seed = "crs_seed_32_bytes_123456789_123456789_123456789".to_string();
+        let session_id = "f8e774bd-2f9d-4502-92ca-ac8b9c25868e".to_string();
         server_envs.append(&mut vec![
             ("SERVICE_NAME".to_string(), "server".to_string()),
             ("PHANTOM_SERVER__CRS_SEED".to_string(), crs_seed.clone()),
@@ -98,6 +99,7 @@ mod tests {
                 ),
                 ("CLIENT__CLIENT_ID".to_string(), i.to_string()),
                 ("CLIENT__CRS_SEED".to_string(), crs_seed.clone()),
+                ("CLIENT__SESSION_ID".to_string(), session_id.clone()),
                 ("CLIENT__CLIENT_SEED".to_string(), format!("client_{}", i)),
                 (
                     "EXPORTER_ENDPOINT".to_string(),
