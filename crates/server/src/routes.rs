@@ -1,12 +1,10 @@
 use std::time::Duration;
 
-use axum::error_handling::HandleErrorLayer;
 use axum::extract::DefaultBodyLimit;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::{post, put};
 use axum::{routing::get, Router};
-use tower::{BoxError, ServiceBuilder};
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::timeout::TimeoutLayer;
 
@@ -16,18 +14,6 @@ use crate::controllers::session::{
 };
 
 pub fn routes(app_state: AppState) -> Router {
-    let builder = ServiceBuilder::new()
-        .layer(HandleErrorLayer::new(|error: BoxError| async move {
-            if error.is::<tower::timeout::error::Elapsed>() {
-                Ok(StatusCode::REQUEST_TIMEOUT)
-            } else {
-                Err((
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Unhandled internal error: {error}"),
-                ))
-            }
-        }))
-        .timeout(Duration::from_secs(60));
     Router::new()
         .route("/", get(root))
         .nest(
@@ -46,7 +32,6 @@ pub fn routes(app_state: AppState) -> Router {
                                     "/{client_id}",
                                     Router::new()
                                         .route("/bootstrap", put(bootstrap_client))
-                                        .layer(builder)
                                         .route("/data", post(add_data))
                                         .layer(DefaultBodyLimit::disable())
                                         .layer(RequestBodyLimitLayer::new(100 * 1000 * 1000)),
@@ -57,7 +42,7 @@ pub fn routes(app_state: AppState) -> Router {
                 .with_state(app_state),
         )
         .route("/health", get(root))
-        .layer(TimeoutLayer::new(Duration::from_secs(600)))
+        .layer(TimeoutLayer::new(Duration::from_secs(60)))
         .fallback(handler_404)
 }
 

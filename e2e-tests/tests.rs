@@ -49,9 +49,11 @@ mod tests {
     async fn test_full_flow() {
         let setup_config = Setup::new().await;
 
-        let mut server_envs = setup_config.envs.clone();
         let crs_seed = "crs_seed_32_bytes_123456789_123456789_123456789".to_string();
         let session_id = "f8e774bd-2f9d-4502-92ca-ac8b9c25868e".to_string();
+
+        // Run server
+        let mut server_envs = setup_config.envs.clone();
         server_envs.append(&mut vec![
             ("SERVICE_NAME".to_string(), "server".to_string()),
             ("PHANTOM_SERVER__CRS_SEED".to_string(), crs_seed.clone()),
@@ -70,11 +72,25 @@ mod tests {
 
         let server_endpoint = format!("http://{}:{}", server.url, server.port);
 
+        // Run worker
+        let mut worker_envs = setup_config.envs.clone();
+        worker_envs.append(&mut vec![
+            ("SERVICE_NAME".to_string(), "worker".to_string()),
+            ("WORKER__SCHEMA".to_string(), "worker".to_string()),
+            ("WORKER__CONCURRENT".to_string(), "3".to_string()),
+            (
+                "EXPORTER_ENDPOINT".to_string(),
+                "127.0.0.1:3000".to_string(),
+            ),
+        ]);
+        let mut worker = Program::run("WORKER".to_string(), "frog_worker", worker_envs);
+        worker.wait_till_started().await;
+
+        // Run clients
         let mut client_ports = vec![];
         for _ in 0..2 {
             client_ports.push(get_free_port());
         }
-
         let mut clients_info = vec![];
         for i in 0..2 {
             let mut client_ports = client_ports.clone();

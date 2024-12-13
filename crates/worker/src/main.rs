@@ -1,14 +1,22 @@
-mod dummy_worker;
 mod options;
 mod routes;
 
 use std::str::FromStr;
+use std::sync::Arc;
 use std::time::Duration;
 
 use clap::{Parser, Subcommand};
+use deadpool_diesel::postgres::Pool;
+use deadpool_diesel::{Manager, Runtime};
+use frog_adapter::postgres::session_db::SessionDBRepository;
 use frog_common::cli_args::CliArgs;
 use frog_common::kill_signals;
 use frog_common::loggers::telemetry::init_telemetry;
+use frog_core::ports::session::SessionPort;
+use frog_worker::app_state::AppState;
+use frog_worker::services::session::SessionService;
+use frog_worker::workers::bs_key_shares::BsKeySharesWorker;
+use frog_worker::workers::compute_function::ComputeFunctionWorker;
 use graphile_worker::WorkerOptions;
 use opentelemetry::global;
 use sqlx::postgres::PgConnectOptions;
@@ -16,7 +24,6 @@ use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 use tracing::info;
 
-use crate::dummy_worker::DummyWorker;
 use crate::options::Options;
 use crate::routes::routes;
 
@@ -89,10 +96,21 @@ pub async fn run_workers(options: Options) {
         .await
         .unwrap();
 
+    let manager = Manager::new(&options.pg.url, Runtime::Tokio1);
+    let pool = Pool::builder(manager)
+        .max_size(options.pg.max_size as usize)
+        .build()
+        .unwrap();
+    let session_port: Arc<dyn SessionPort + Send + Sync> = Arc::new(SessionDBRepository::new(pool));
+    let session_service = Arc::new(SessionService::new(session_port));
+
+    let app_state = AppState::new(session_service);
     let worker = WorkerOptions::default()
         .concurrency(options.worker.concurrent)
         .schema(options.worker.schema.as_str())
-        .define_job::<DummyWorker>()
+        .add_extension(app_state)
+        .define_job::<BsKeySharesWorker>()
+        .define_job::<ComputeFunctionWorker>()
         .pg_pool(pg_pool)
         .init()
         .await

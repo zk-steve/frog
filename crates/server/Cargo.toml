@@ -19,13 +19,6 @@ phantom = { workspace = true }
 phantom-zone-evaluator = { workspace = true }
 readonly = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-sqlx = { workspace = true, features = [
-  "chrono",
-  "postgres",
-  "json",
-  "macros",
-  "runtime-tokio",
-] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 tower = { workspace = true, features = ["timeout"] }

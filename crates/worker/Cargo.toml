@@ -7,10 +7,14 @@ build = "build.rs"
 [dependencies]
 axum = { workspace = true, features = ["macros"] }
 clap = { workspace = true, features = ["derive"] }
+deadpool-diesel = { workspace = true, features = ["postgres", "serde"] }
+frog_adapter = { workspace = true }
 frog_common = { workspace = true }
+frog_core = { workspace = true }
 graphile_worker = { workspace = true }
 opentelemetry = { workspace = true }
-opentelemetry_sdk = { workspace = true }
+phantom = { workspace = true }
+phantom-zone-evaluator = { workspace = true }
 readonly = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 sqlx = { workspace = true, features = [
@@ -20,6 +24,7 @@ sqlx = { workspace = true, features = [
   "macros",
   "runtime-tokio",
 ] }
+thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["timeout", "trace"] }
 tracing = { workspace = true }
