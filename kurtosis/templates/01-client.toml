@@ -4,3 +4,11 @@ exporter_endpoint = "{{$.exporter_endpoint}}"
 [server]
 url = "0.0.0.0"
 port = {{$.http_port}}
+
+[client]
+server_endpoint = "{{$.server_endpoint}}"
+client_id = {{$.client_id}}
+crs_seed = "{{$.crs_seed}}"
+client_seed = "{{$.client_seed}}"
+peer_endpoints = {{$.peer_endpoints}}
+session_id = "{{$.session_id}}"

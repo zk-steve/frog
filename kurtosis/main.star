@@ -1,4 +1,5 @@
 server_package = "./server.star"
+server_lib_package = "./lib/server.star"
 worker_package = "./worker.star"
 client_package = "./client.star"
 
@@ -91,11 +92,12 @@ def run(
 
     if args["deploy_client"]:
         plan.print("Deploying clients")
+        args["client"]["server_name"] = import_module(
+            server_lib_package
+        ).get_server_name(args["server"], suffix=args["deployment_suffix"])
         args["client"]["exporter_endpoint"] = exporter_endpoint
         import_module(client_package).run(
-            plan,
-            args["client"],
-            suffix=args["deployment_suffix"],
+            plan, args["client"], suffix=args["deployment_suffix"]
         )
     else:
         plan.print("Skipping the deployment of clients")

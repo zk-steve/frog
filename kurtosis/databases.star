@@ -8,7 +8,7 @@ USE_REMOTE_POSTGRES = False
 POSTGRES_HOSTNAME = "127.0.0.1"
 
 # Mostly static params unless user has specialized postgres configuration
-POSTGRES_IMAGE = "postgres:16.2"
+POSTGRES_IMAGE = "postgres:16.2-alpine"
 POSTGRES_SERVICE_NAME = "postgres"
 POSTGRES_PORT = 5432
 
