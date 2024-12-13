@@ -1,4 +1,3 @@
-use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -7,21 +6,21 @@ use deadpool_diesel::postgres::Pool;
 use deadpool_diesel::{Manager, Runtime};
 use diesel_migrations::MigrationHarness;
 use frog_adapter::postgres::session_db::{SessionDBRepository, MIGRATIONS};
+use frog_adapter::worker::WorkerAdapter;
 use frog_common::cli_args::CliArgs;
 use frog_common::kill_signals;
 use frog_common::loggers::telemetry::init_telemetry;
 use frog_core::ports::session::SessionPort;
+use frog_core::ports::worker::WorkerPort;
 use frog_server::app_state::AppState;
 use frog_server::options::Options;
 use frog_server::routes::routes;
 use frog_server::services::session::SessionService;
-use graphile_worker::WorkerUtils;
 use opentelemetry::global;
 use phantom::crs::Crs;
 use phantom::param::Param;
 use phantom::utils::I_2P_60;
 use phantom_zone_evaluator::boolean::fhew::prelude::{DecompositionParam, Modulus};
-use sqlx::postgres::PgConnectOptions;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 use tracing::info;
@@ -66,14 +65,6 @@ enum Commands {
 }
 
 pub async fn serve(options: Options) {
-    let pg_options = PgConnectOptions::from_str(&options.pg.url).unwrap();
-
-    let pg_pool = sqlx::postgres::PgPoolOptions::new()
-        .max_connections(options.pg.max_size)
-        .connect_with(pg_options)
-        .await
-        .unwrap();
-
     let manager = Manager::new(&options.pg.url, Runtime::Tokio1);
     let pool = Pool::builder(manager)
         .max_size(options.pg.max_size as usize)
@@ -111,17 +102,26 @@ pub async fn serve(options: Options) {
         },
     };
 
-    let worker_utils = Arc::new(WorkerUtils::new(pg_pool, options.worker.schema.clone()));
+    let worker_adapter: Arc<dyn WorkerPort + Send + Sync> = Arc::new(
+        WorkerAdapter::new(
+            &options.pg.url,
+            options.pg.max_size,
+            options.worker.schema.clone(),
+        )
+        .await,
+    );
+
     let session_service = Arc::new(SessionService::new(
         session_port,
         phantom_param,
         crs,
         options.phantom_server.participant_number,
+        worker_adapter,
     ));
     session_service.delete().await.unwrap();
     session_service.create().await.unwrap();
 
-    let routes = routes(AppState::new(worker_utils, session_service)).layer((
+    let routes = routes(AppState::new(session_service)).layer((
         TraceLayer::new_for_http(),
         // Graceful shutdown will wait for outstanding requests to complete. Add a timeout so
         // requests don't hang forever.

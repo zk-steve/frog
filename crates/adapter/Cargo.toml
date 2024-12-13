@@ -14,8 +14,20 @@ diesel = { workspace = true, features = [
   "serde_json",
 ] }
 diesel_migrations = { workspace = true }
+frog_common = { workspace = true }
 frog_core = { workspace = true }
+graphile_worker = { workspace = true }
 log = { workspace = true }
+opentelemetry = { workspace = true }
 reqwest = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+sqlx = { workspace = true, features = [
+  "chrono",
+  "postgres",
+  "json",
+  "macros",
+  "runtime-tokio",
+] }
+tracing = { workspace = true }
+tracing-opentelemetry = { workspace = true }
 uuid = { workspace = true }
