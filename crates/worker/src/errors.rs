@@ -1,11 +1,14 @@
 use frog_core::errors::CoreError;
 use thiserror::Error;
 
-// The kinds of errors we can hit in our application.
+/// Represents application-level errors that can occur during execution.
 #[derive(Error, Debug)]
 pub enum AppError {
-    #[error("core error")]
+    /// Error originating from the core application logic.
+    #[error("Core error: {0}")]
     CoreError(#[from] CoreError),
-    #[error("Unexpected error {0}")]
+
+    /// A generic unexpected error with a custom message.
+    #[error("Unexpected error: {0}")]
     UnexpectedError(String),
 }

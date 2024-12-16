@@ -1,3 +1,4 @@
+use anyhow::Error;
 use async_trait::async_trait;
 use deadpool_diesel::postgres::Pool;
 use diesel::{
@@ -25,49 +26,51 @@ impl SessionDBRepository {
     }
 }
 
+fn map_diesel_error(err: diesel::result::Error) -> CoreError {
+    match err {
+        diesel::result::Error::NotFound => CoreError::NotFound,
+        _ => CoreError::InternalError(err.into()),
+    }
+}
+
 #[async_trait]
 impl SessionPort for SessionDBRepository {
     async fn create(&self, session_entity: SessionEntity) -> Result<SessionId, CoreError> {
-        self.db
+        let conn = self
+            .db
             .get()
             .await
-            .unwrap()
-            .interact(move |conn| {
-                let session = SessionModel::try_from(session_entity)
-                    .map_err(|err| CoreError::InternalError(err.into()))?;
-                let response = insert_into(sessions)
-                    .values(&session)
-                    .get_result::<SessionModel>(conn)
-                    .map_err(|err| match err {
-                        diesel::result::Error::NotFound => CoreError::NotFound,
-                        _ => CoreError::InternalError(err.into()),
-                    })?;
-                Ok(SessionId(response.id))
-            })
-            .await
-            .unwrap()
+            .map_err(|e| CoreError::InternalError(e.into()))?;
+        conn.interact(move |conn| {
+            let session = SessionModel::try_from(session_entity)
+                .map_err(|err| CoreError::InternalError(err.into()))?;
+            let response = insert_into(sessions)
+                .values(&session)
+                .get_result::<SessionModel>(conn)
+                .map_err(map_diesel_error)?;
+            Ok(SessionId(response.id))
+        })
+        .await
+        .map_err(|e| CoreError::InternalError(Error::msg(e.to_string())))?
     }
 
     async fn get(&self, session_id: SessionId) -> Result<SessionEntity, CoreError> {
-        self.db
+        let conn = self
+            .db
             .get()
             .await
-            .unwrap()
-            .interact(move |conn| {
-                let response = sessions
-                    .filter(id.eq(session_id.0))
-                    .select(SessionModel::as_select())
-                    .first(conn)
-                    .map_err(|err| match err {
-                        diesel::result::Error::NotFound => CoreError::NotFound,
-                        _ => CoreError::InternalError(err.into()),
-                    })?
-                    .into();
-
-                Ok(response)
-            })
-            .await
-            .unwrap()
+            .map_err(|e| CoreError::InternalError(e.into()))?;
+        conn.interact(move |conn| {
+            let response = sessions
+                .filter(id.eq(session_id.0))
+                .select(SessionModel::as_select())
+                .first::<SessionModel>(conn)
+                .map_err(map_diesel_error)?
+                .into();
+            Ok(response)
+        })
+        .await
+        .map_err(|e| CoreError::InternalError(Error::msg(e.to_string())))?
     }
 
     async fn update(
@@ -75,43 +78,41 @@ impl SessionPort for SessionDBRepository {
         session_id: SessionId,
         session_entity: SessionEntity,
     ) -> Result<SessionId, CoreError> {
-        assert_eq!(session_id, session_entity.id);
-        self.db
+        if session_id != session_entity.id {
+            return Err(CoreError::ValidationFail("Session ID mismatch".to_string()));
+        }
+
+        let conn = self
+            .db
             .get()
             .await
-            .unwrap()
-            .interact(move |conn| {
-                let session = SessionModel::try_from(session_entity)
-                    .map_err(|err| CoreError::InternalError(err.into()))?;
-                let response = update(sessions.filter(id.eq(session.id)))
-                    .set(&session)
-                    .get_result::<SessionModel>(conn)
-                    .map_err(|err| match err {
-                        diesel::result::Error::NotFound => CoreError::NotFound,
-                        _ => CoreError::InternalError(err.into()),
-                    })?;
-                Ok(SessionId(response.id))
-            })
-            .await
-            .unwrap()
+            .map_err(|e| CoreError::InternalError(e.into()))?;
+        conn.interact(move |conn| {
+            let session = SessionModel::try_from(session_entity)
+                .map_err(|err| CoreError::InternalError(err.into()))?;
+            let response = update(sessions.filter(id.eq(session.id)))
+                .set(&session)
+                .get_result::<SessionModel>(conn)
+                .map_err(map_diesel_error)?;
+            Ok(SessionId(response.id))
+        })
+        .await
+        .map_err(|e| CoreError::InternalError(Error::msg(e.to_string())))?
     }
 
     async fn delete(&self, session_id: SessionId) -> Result<(), CoreError> {
-        self.db
+        let conn = self
+            .db
             .get()
             .await
-            .unwrap()
-            .interact(move |conn| {
-                let _ = delete(sessions.filter(id.eq(session_id.0)))
-                    .execute(conn)
-                    .map_err(|err| match err {
-                        diesel::result::Error::NotFound => CoreError::NotFound,
-                        _ => CoreError::InternalError(err.into()),
-                    })?;
-
-                Ok(())
-            })
-            .await
-            .unwrap()
+            .map_err(|e| CoreError::InternalError(e.into()))?;
+        conn.interact(move |conn| {
+            delete(sessions.filter(id.eq(session_id.0)))
+                .execute(conn)
+                .map_err(map_diesel_error)?;
+            Ok(())
+        })
+        .await
+        .map_err(|e| CoreError::InternalError(Error::msg(e.to_string())))?
     }
 }

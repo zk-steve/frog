@@ -62,3 +62,17 @@ pub const I_2P_60: FhewBoolMpiParam = FhewBoolMpiParam {
     },
     total_shares: 2,
 };
+
+/// Pads a seed to 32 bytes.
+///
+/// # Arguments
+/// - `seed`: The input seed as a byte slice.
+///
+/// # Returns
+/// A 32-byte array padded with zeros.
+pub fn pad_seed_to_32_bytes(seed: &[u8]) -> [u8; 32] {
+    let mut padded = [0u8; 32];
+    let len = seed.len().min(32);
+    padded[..len].copy_from_slice(&seed[..len]);
+    padded
+}

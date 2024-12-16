@@ -9,57 +9,86 @@ use thiserror::Error;
 
 use crate::json_response::JsonResponse;
 
-// The kinds of errors we can hit in our application.
+/// Application-wide error types.
+///
+/// This enum represents all the errors that can occur within the application.
+/// Each variant corresponds to a specific type of error that may arise during
+/// request handling, database operations, or worker interactions.
 #[derive(Error, Debug)]
 pub enum AppError {
-    // The request body contained invalid JSON
-    #[error("json error")]
+    /// The request body contained invalid JSON.
+    #[error("Invalid JSON in the request body: {0}")]
     JsonRejection(JsonRejection),
-    #[error("io error")]
+
+    /// Input/output operation errors.
+    #[error("I/O error occurred: {0}")]
     IOError(#[from] io::Error),
-    #[error("core error")]
+
+    /// Errors from the core logic of the application.
+    #[error("Core error occurred: {0}")]
     CoreError(#[from] CoreError),
-    #[error("graphile worker error")]
+
+    /// Errors related to the Graphile worker.
+    #[error("Graphile worker error occurred: {0}")]
     GraphileWorkerError(#[from] GraphileWorkerError),
-    #[error("session error {0}")]
+
+    /// Session-specific errors, represented as a custom message.
+    #[error("Session error: {0}")]
     SessionError(String),
-    #[error("bincode error")]
+
+    /// Errors arising from serialization or deserialization via `bincode`.
+    #[error("Bincode serialization error occurred: {0}")]
     BincodeError(#[from] bincode::Error),
+
+    /// Error during serialization or deserialization with `bincode`.
+    #[error("Unexpected error: {0}")]
+    UnexpectedError(String),
 }
 
-// Tell axum how `AppError` should be converted into a response.
-//
-// This is also a convenient place to log errors.
+/// Convert `AppError` into an HTTP response.
+///
+/// This implementation defines how `AppError` is converted into an HTTP response,
+/// allowing it to serve as the central error handler for Axum-based routes. Errors
+/// are logged as necessary, and appropriate HTTP status codes and messages are returned.
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        // How we want errors responses to be serialized
+        // Internal struct to format error responses as JSON.
         #[derive(serde::Serialize)]
         struct ErrorResponse {
             message: String,
         }
 
+        // Map errors to appropriate HTTP status codes and messages.
         let (status, message) = match self {
             AppError::JsonRejection(rejection) => {
-                // This error is caused by bad user input so don't log it
+                // Errors caused by invalid JSON input are client errors.
                 (rejection.status(), rejection.body_text())
             }
             AppError::GraphileWorkerError(error) => {
+                // Graphile worker errors are internal server errors.
                 (StatusCode::INTERNAL_SERVER_ERROR, error.to_string())
             }
-            AppError::SessionError(error) => (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
-            AppError::CoreError(error) => (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
+            AppError::SessionError(error) => {
+                // Session-related errors are internal server errors.
+                (StatusCode::INTERNAL_SERVER_ERROR, error)
+            }
+            AppError::CoreError(error) => {
+                // Core application logic errors are internal server errors.
+                (StatusCode::INTERNAL_SERVER_ERROR, error.to_string())
+            }
             e => {
-                // Because `TraceLayer` wraps each request in a span that contains the request
-                // method, uri, etc we don't need to include those details here
-                tracing::error!(%e, "unknown error");
+                // Log unexpected errors.
+                tracing::error!(%e, "Unhandled application error");
 
-                // Don't expose any details about the error to the client
+                // Do not expose details of unexpected errors to the client.
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    "Something went wrong".to_owned(),
+                    "An unexpected error occurred".to_owned(),
                 )
             }
         };
+
+        // Convert the error into an HTTP response with a JSON body.
         (status, JsonResponse(ErrorResponse { message })).into_response()
     }
 }

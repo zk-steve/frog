@@ -23,9 +23,17 @@ impl PeerPort for PeerClient {
             .await
             .map_err(|e| CoreError::InternalError(e.into()))?;
 
+        // Check the response status and handle any non-OK responses explicitly.
+        if !response.status().is_success() {
+            return Err(CoreError::UnexpectedResponse(format!(
+                "Received non-success status: {}",
+                response.status()
+            )));
+        }
+
         response
             .json()
             .await
-            .map_err(|e| CoreError::ParseResponseError(e.into()))
+            .map_err(|e| CoreError::InternalError(e.into()))
     }
 }
