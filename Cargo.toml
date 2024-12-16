@@ -42,7 +42,7 @@ phantom-zone-evaluator = { version = "0.1.0", git = "https://github.com/gausslab
 rand = { version = "0.8.5", features = ["std_rng"] }
 readonly = { version = "0.2.12" }
 reqwest = { version = "0.12.8", features = ["json"] }
-serde = { version = "1.0.210" }
+serde = { version = "1.0.216" }
 sqlx = { version = "*" }
 test-log = { version = "0.2.16" }
 testcontainers-modules = { version = "0.11.3" }
