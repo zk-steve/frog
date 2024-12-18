@@ -18,7 +18,7 @@ Learn more about the system's architecture [here](docs/architecture.md).
 ## Future Plans
 
 - [x] ~~Finalize Docker and Kurtosis configurations to simplify deployment on Docker or Kubernetes.~~
-- [ ] Add comprehensive documentation and comments in the codebase to improve maintainability and usability.
+- [x] ~~Add comprehensive documentation and comments in the codebase to improve maintainability and usability.~~
 - [ ] Transition Phantom-related parameters from being stored in the database to a dedicated file storage solution (
   e.g., S3) for better performance.
 - [x] ~~Complete the implementation of the worker service and database (currently, the server processes tasks and stores
