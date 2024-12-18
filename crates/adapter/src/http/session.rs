@@ -4,6 +4,7 @@ use frog_core::entities::session::{SessionEntity, SessionId};
 use frog_core::errors::CoreError;
 use frog_core::errors::CoreError::UnexpectedResponse;
 use frog_core::ports::session_client::SessionClientPort;
+use log::error;
 use reqwest::{Client, StatusCode};
 
 pub struct SessionClient {
@@ -17,6 +18,21 @@ impl SessionClient {
             server_endpoint,
             client,
         }
+    }
+
+    /// Helper function to handle HTTP responses.
+    async fn handle_response(&self, response: reqwest::Response) -> Result<String, CoreError> {
+        let status = response.status();
+        let body = response
+            .text()
+            .await
+            .map_err(|e| CoreError::InternalError(e.into()))?;
+
+        if status != StatusCode::OK {
+            error!("Unexpected response with status {}: {}", status, body);
+            return Err(UnexpectedResponse(body));
+        }
+        Ok(body)
     }
 }
 
@@ -37,14 +53,8 @@ impl SessionClientPort for SessionClient {
             .send()
             .await
             .map_err(|e| CoreError::InternalError(e.into()))?;
-        let status = response.status();
-        if status != StatusCode::OK {
-            let body = response
-                .text()
-                .await
-                .map_err(|e| CoreError::ParseResponseError(e.into()))?;
-            return Err(UnexpectedResponse(body));
-        }
+
+        self.handle_response(response).await?;
         Ok(())
     }
 
@@ -61,7 +71,7 @@ impl SessionClientPort for SessionClient {
         response
             .json::<SessionEntity>()
             .await
-            .map_err(|e| CoreError::ParseResponseError(e.into()))
+            .map_err(|e| CoreError::InternalError(e.into()))
     }
 
     async fn bootstrap(
@@ -81,14 +91,7 @@ impl SessionClientPort for SessionClient {
             .await
             .map_err(|e| CoreError::InternalError(e.into()))?;
 
-        let status = response.status();
-        if status != StatusCode::OK {
-            let body = response
-                .text()
-                .await
-                .map_err(|e| CoreError::ParseResponseError(e.into()))?;
-            return Err(UnexpectedResponse(body));
-        }
+        self.handle_response(response).await?;
         Ok(())
     }
 
@@ -109,14 +112,7 @@ impl SessionClientPort for SessionClient {
             .await
             .map_err(|e| CoreError::InternalError(e.into()))?;
 
-        let status = response.status();
-        if status != StatusCode::OK {
-            let body = response
-                .text()
-                .await
-                .map_err(|e| CoreError::ParseResponseError(e.into()))?;
-            return Err(UnexpectedResponse(body));
-        }
+        self.handle_response(response).await?;
         Ok(())
     }
 }
