@@ -1,69 +1,88 @@
-# How To Run
+# How to Run
 
-> [!NOTE]  
-> This section is under construction and may contain inaccuracies.
+## Using Kurtosis
 
-To get started, execute the following command in your terminal:
+### Prerequisites
 
-```shell
-./frog --help
+Before starting, ensure you have the following tools installed:
+
+- [Docker](https://docs.docker.com/get-docker/) (
+  version >= [4.27.0](https://docs.docker.com/desktop/release-notes/#4270) for Mac users)
+- [Kurtosis](https://docs.kurtosis.com/install/)
+
+### Deployment
+
+Once the prerequisites are installed, run the following commands to deploy the complete stack locally.
+
+```bash
+cd kurtosis
+kurtosis clean --all
+kurtosis run --enclave frog-v1 --args-file params.yaml .
 ```
 
-This will display the available options for running the server:
+You should see an output similar to this:
 
 ```
-Frog
+...Omitted...
 
-Usage: frog [OPTIONS] [COMMAND]
-
-Commands:
-  config  Print config
-  help    Print this message or the help of the given subcommand(s)
-
-Options:
-  -c, --config-path <CONFIG_PATH>  Config file [default: config/default.toml]
-  -v, --version                    Print version
-  -h, --help                       Print help
+========================================== User Services ==========================================
+UUID           Name                Ports                                                Status
+403d5c31dc9d   frog-client-0-001   http: 9944/tcp -> http://127.0.0.1:32982             RUNNING
+982dacc80e6f   frog-client-1-001   http: 9944/tcp -> http://127.0.0.1:32983             RUNNING
+9daf9e37b994   frog-server-001     http: 9944/tcp -> http://127.0.0.1:32980             RUNNING
+145281e8f2eb   frog-worker-001     http: 9944/tcp -> http://127.0.0.1:32981             RUNNING
+202b5db0b6d1   jaeger-001          http: 16686/tcp -> http://127.0.0.1:32979            RUNNING
+be800261692b   postgres-001        postgres: 5432/tcp -> postgresql://127.0.0.1:32976   RUNNING
+3de7d5c6cea0   quickwit-001        grpc: 7281/tcp -> http://127.0.0.1:32978             RUNNING
+                                   http: 7280/tcp -> http://127.0.0.1:32977        
 ```
 
-## Example
+To view container logs, use the `docker logs` command.
 
-- Multiple config locations
+After a few minutes, you can query the result from the client with the following command (note: replace the port with
+what you have):
 
-```shell
-./cli -c ./config/*.toml -c deploy/local/custom.toml
+```bash
+curl http://127.0.0.1:32982/result
 ```
 
-- Pipe the output with [bunyan](https://github.com/trentm/node-bunyan)
+---
 
-```shell
-cargo install bunyan
-./cli -c ./config/*.toml -c deploy/local/custom.toml | bunyan
+## For Developers
+
+### Prerequisites
+
+Ensure you have a running PostgreSQL instance on port 5432. If your PostgreSQL instance is running on a different port,
+update the configuration files accordingly.
+
+### Deployment
+
+- Start the server:
+
+```bash
+cd crates/public
+RUST_BACKTRACE=1 RUST_LOG=info cargo run --
 ```
 
-# Configuration
+- In another terminal, start the worker:
 
-## Order of apply
+```bash
+cd crates/worker
+RUST_BACKTRACE=1 RUST_LOG=info cargo run --
+```
 
-Configuration is applied in the following order: config files -> environment variables -> command-line arguments.
+- In another terminal, start the first client:
 
-If you use `-c *.toml` to load config files, please be mindful of the order in which the files are applied.
+```bash
+cd crates/client
+RUST_BACKTRACE=1 RUST_LOG=info cargo run --
+```
 
-### Environment Variable Examples
+- In another terminal, start the second client with a specific configuration:
 
-The server can be configured using environment variables. Below is a table outlining the available configuration
-options:
+```bash
+cd crates/client
+RUST_BACKTRACE=1 RUST_LOG=info cargo run -- -c ./config/01-client-01.toml
+```
 
-Hierarchical child config via env, separated by using `__`. Specify list values by using `,` separator
-
-| ENV                                                                      | DEFAULT VALUE | NOTE      |
-|--------------------------------------------------------------------------|---------------|-----------|
-| [RUST_LOG](https://docs.rs/env_logger/latest/env_logger/) > LOG\_\_LEVEL | "INFO"        | Log level |
-| SERVER\_\_URL                                                            |               |           |
-| SERVER\_\_PORT                                                           |               |           |
-| SERVICE_NAME                                                             |               |           |
-| EXPORTER_ENDPOINT                                                        |               |           |
-| DB\_\_PG\_\_URL                                                          | "localhost"   |           |
-| DB\_\_PG\_\_MAX_SIZE                                                     | 5432          |           |
-
-Make sure to set these environment variables according to your needs before running the server.
+Once all components are running, you can test the system as required.

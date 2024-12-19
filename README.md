@@ -19,8 +19,8 @@ Learn more about the system's architecture [here](docs/architecture.md).
 
 - [x] ~~Finalize Docker and Kurtosis configurations to simplify deployment on Docker or Kubernetes.~~
 - [x] ~~Add comprehensive documentation and comments in the codebase to improve maintainability and usability.~~
-- [ ] Transition Phantom-related parameters from being stored in the database to a dedicated file storage solution (
-  e.g., S3) for better performance.
+- [ ] Transition Phantom-related parameters from being stored in the database to a dedicated file storage solution
+  (e.g., S3) for better performance.
 - [x] ~~Complete the implementation of the worker service and database (currently, the server processes tasks and stores
   data locally).~~
 - [ ] Develop a toolkit similar to [Ignite](https://github.com/ignite/cli) to streamline the development process with a
